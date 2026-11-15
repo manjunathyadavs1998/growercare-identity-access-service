@@ -1,0 +1,467 @@
+{
+  "components" : {
+    "schemas" : {
+      "CreateGrantRequest" : {
+        "properties" : {
+          "buCodes" : {
+            "items" : {
+              "pattern" : "^[A-Z]{2,8}$",
+              "type" : "string"
+            },
+            "maxItems" : 10,
+            "minItems" : 0,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "countryCodes" : {
+            "items" : {
+              "pattern" : "^[A-Z]{2}$",
+              "type" : "string"
+            },
+            "maxItems" : 50,
+            "minItems" : 0,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "reason" : {
+            "maxLength" : 300,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "regionCodes" : {
+            "items" : {
+              "pattern" : "^[A-Z]{2,8}$",
+              "type" : "string"
+            },
+            "maxItems" : 10,
+            "minItems" : 0,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "roleCode" : {
+            "minLength" : 1,
+            "pattern" : "^[A-Z][A-Z_]{1,39}$",
+            "type" : "string"
+          },
+          "territoryIds" : {
+            "items" : {
+              "pattern" : "^[1-9][0-9]{0,18}$",
+              "type" : "string"
+            },
+            "maxItems" : 200,
+            "minItems" : 0,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "userId" : {
+            "minLength" : 1,
+            "pattern" : "^[1-9][0-9]{0,18}$",
+            "type" : "string"
+          },
+          "validTo" : {
+            "format" : "date-time",
+            "type" : "string"
+          }
+        },
+        "required" : [ "reason", "roleCode", "userId" ],
+        "type" : "object"
+      },
+      "EffectiveGrant" : {
+        "properties" : {
+          "buCodes" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "countries" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "grantId" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "permissions" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "piiClearance" : {
+            "enum" : [ "NONE", "MASKED", "FULL" ],
+            "type" : "string"
+          },
+          "roleCode" : {
+            "type" : "string"
+          },
+          "roleLevel" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "scopeKind" : {
+            "enum" : [ "OWN", "ORG", "ASSIGNED", "TERRITORY", "COUNTRY", "REGION", "GLOBAL" ],
+            "type" : "string"
+          },
+          "territories" : {
+            "items" : {
+              "format" : "int64",
+              "type" : "integer"
+            },
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "validTo" : {
+            "format" : "date-time",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "EffectiveGrantView" : {
+        "properties" : {
+          "buCodes" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "countryCodes" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "grantId" : {
+            "type" : "string"
+          },
+          "permissions" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "piiClearance" : {
+            "type" : "string"
+          },
+          "roleCode" : {
+            "type" : "string"
+          },
+          "scopeKind" : {
+            "type" : "string"
+          },
+          "territoryIds" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "validTo" : {
+            "format" : "date-time",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "GcPrincipal" : {
+        "properties" : {
+          "grants" : {
+            "items" : {
+              "$ref" : "#/components/schemas/EffectiveGrant"
+            },
+            "type" : "array"
+          },
+          "homeCountry" : {
+            "type" : "string"
+          },
+          "partnerOrgId" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "subject" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "userId" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "userType" : {
+            "enum" : [ "GROWER", "PARTNER", "STAFF" ],
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "GrantView" : {
+        "properties" : {
+          "buCodes" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "countryCodes" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "grantId" : {
+            "type" : "string"
+          },
+          "grantedByUserId" : {
+            "type" : "string"
+          },
+          "regionCodes" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "revokedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "roleCode" : {
+            "type" : "string"
+          },
+          "territoryIds" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "userId" : {
+            "type" : "string"
+          },
+          "validFrom" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "validTo" : {
+            "format" : "date-time",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "MeView" : {
+        "properties" : {
+          "grants" : {
+            "items" : {
+              "$ref" : "#/components/schemas/EffectiveGrantView"
+            },
+            "type" : "array"
+          },
+          "homeCountry" : {
+            "type" : "string"
+          },
+          "partnerOrgId" : {
+            "type" : "string"
+          },
+          "userId" : {
+            "type" : "string"
+          },
+          "userType" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      }
+    },
+    "securitySchemes" : {
+      "bearer" : {
+        "bearerFormat" : "JWT",
+        "description" : "Keycloak access token (audience gc-api)",
+        "scheme" : "bearer",
+        "type" : "http"
+      }
+    }
+  },
+  "info" : {
+    "description" : "GrowerCare identity-access-service. Errors are RFC 9457 problem+json; IDs are strings.",
+    "title" : "identity-access-service",
+    "version" : "v1"
+  },
+  "openapi" : "3.1.0",
+  "paths" : {
+    "/grants" : {
+      "post" : {
+        "operationId" : "create",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateGrantRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GrantView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "grant-controller" ]
+      }
+    },
+    "/grants/{grantId}" : {
+      "delete" : {
+        "operationId" : "revoke",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "grantId",
+          "required" : true,
+          "schema" : {
+            "pattern" : "^[1-9][0-9]{0,18}$",
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "reason",
+          "required" : true,
+          "schema" : {
+            "maxLength" : 300,
+            "minLength" : 0,
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GrantView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "grant-controller" ]
+      }
+    },
+    "/internal/users/by-id/{userId}/principal" : {
+      "get" : {
+        "operationId" : "principalById",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "userId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GcPrincipal"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "internal-principal-controller" ]
+      }
+    },
+    "/internal/users/{subject}/principal" : {
+      "get" : {
+        "operationId" : "principal",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "subject",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GcPrincipal"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "internal-principal-controller" ]
+      }
+    },
+    "/me" : {
+      "get" : {
+        "operationId" : "me",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MeView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "grant-controller" ]
+      }
+    },
+    "/users/{userId}/grants" : {
+      "get" : {
+        "operationId" : "grantsOfUser",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "userId",
+          "required" : true,
+          "schema" : {
+            "pattern" : "^[1-9][0-9]{0,18}$",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/GrantView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "grant-controller" ]
+      }
+    }
+  },
+  "security" : [ {
+    "bearer" : [ ]
+  } ],
+  "servers" : [ {
+    "description" : "Generated server url",
+    "url" : "http://localhost"
+  } ]
+}

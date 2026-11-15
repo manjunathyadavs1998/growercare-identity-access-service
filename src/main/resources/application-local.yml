@@ -1,0 +1,10 @@
+# Profile "local": matches gc-backend/local-dev/.env.example. DEV ONLY.
+spring:
+  datasource:
+    password: ${DB_APP_PASSWORD:dev_iam_app_pw}
+  flyway:
+    password: ${DB_OWNER_PASSWORD:dev_iam_owner_pw}
+    locations: classpath:db/migration,classpath:db/dev-seed
+gc.security.cors-allowed-origins: http://localhost:5173
+springdoc.api-docs.enabled: true
+springdoc.swagger-ui.enabled: true

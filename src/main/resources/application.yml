@@ -1,0 +1,63 @@
+# 12-factor: every environment-specific value comes from an env var (defaults = local-dev stack).
+server:
+  port: ${SERVER_PORT:8081}
+  shutdown: graceful
+  error:
+    include-stacktrace: never
+    include-message: never
+
+spring:
+  application:
+    name: identity-access-service
+  threads:
+    virtual:
+      enabled: true
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/gc_iam}
+    username: ${DB_APP_USER:gc_iam_app}
+    password: ${DB_APP_PASSWORD}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:20}
+      connection-timeout: 3000
+  # Migrations run as the schema OWNER; the service itself connects as the DML-only app role.
+  # In production set GC_MIGRATE=false on the service and run migrations from a pre-deploy Job.
+  flyway:
+    enabled: ${GC_MIGRATE:true}
+    user: ${DB_OWNER_USER:gc_iam_owner}
+    password: ${DB_OWNER_PASSWORD:}
+    schemas: iam
+    default-schema: iam
+    create-schemas: true
+    locations: classpath:db/migration
+    clean-disabled: true
+    placeholders:
+      app_role: ${spring.datasource.username}
+
+# SPEC-PLAT-01 D1: API docs off by default; the local profile turns them on.
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+
+# ---------------------------------------------------------------- security (skill: java-security-rbac)
+# Keycloak proves identity; roles/scopes come from IAM grants. Issuer, signature, expiry and audience are validated.
+spring.security.oauth2.resourceserver.jwt:
+  issuer-uri: ${OIDC_ISSUER_URI:http://localhost:8180/realms/growercare}
+  audiences: gc-api,gc-internal
+
+gc.security:
+  internal-clients: ${GC_INTERNAL_CLIENTS:case-service}
