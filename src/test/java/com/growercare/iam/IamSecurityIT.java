@@ -129,6 +129,13 @@ class IamSecurityIT {
             mvc.perform(get("/actuator/health")).andExpect(status().isOk());
         }
 
+        @org.junit.jupiter.params.ParameterizedTest(name = "PLAT-E84 firewall-rejected {0} is problem+json")
+        @org.junit.jupiter.params.provider.ValueSource(strings = {"/grants/%2e%2e/1", "/me;jsessionid=x"})
+        void rejectedPathsAreProblemJson(String path) throws Exception {
+            problem(call(get(java.net.URI.create(path)), ADMIN_IN), 400, "VALIDATION_FAILED")
+                    .andExpect(jsonPath("$.errors[0].field").value("path"));
+        }
+
         @org.junit.jupiter.params.ParameterizedTest(name = "PLAT-R2 {0} is not exposed by default")
         @org.junit.jupiter.params.provider.ValueSource(strings = {"/v3/api-docs", "/swagger-ui/index.html"})
         void apiDocsAreNotExposedByDefault(String path) throws Exception {
