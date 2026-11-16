@@ -34,7 +34,7 @@ class IamSchemaMigrationIT {
     @Test
     void everyRoleHasPermissionsAndNoMappingWasSilentlyDropped() {
         int mappings = app.sql("SELECT count(*) FROM iam.role_permission").query(Integer.class).single();
-        assertThat(mappings).isEqualTo(90);   // sum of the V4 permission lists; a typo in V4 would lower it
+        assertThat(mappings).isEqualTo(99);   // 90 from the V4 lists + 9 case:attach (V6, SPEC-CASE-05 D8); a typo would lower it
         var rolesWithout = app.sql("""
                 SELECT r.role_code FROM iam.role r
                  WHERE NOT EXISTS (SELECT 1 FROM iam.role_permission rp WHERE rp.role_code = r.role_code)""")
