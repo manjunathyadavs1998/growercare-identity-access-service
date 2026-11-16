@@ -5,6 +5,7 @@ spring:
   flyway:
     password: ${DB_OWNER_PASSWORD:dev_iam_owner_pw}
     locations: classpath:db/migration,classpath:db/dev-seed
+    out-of-order: true   # SPEC-PLAT-04 R63: the dev seed is V1000; later V5+ must still apply locally
 gc.security.cors-allowed-origins: http://localhost:5173
 springdoc.api-docs.enabled: true
 springdoc.swagger-ui.enabled: true

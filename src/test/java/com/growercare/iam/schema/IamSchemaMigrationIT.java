@@ -24,7 +24,7 @@ class IamSchemaMigrationIT {
                 .dataSource(db.ownerDataSource())
                 .schemas("iam").defaultSchema("iam").createSchemas(true)
                 .locations("classpath:db/migration", "classpath:db/dev-seed")
-                .placeholders(Map.of("app_role", db.appUser()))
+                .placeholders(Map.of("app_role", db.appUser(), "cdc_role", PostgresTestDatabase.CDC_ROLE))
                 .cleanDisabled(true)
                 .load().migrate();
         assertThat(result.success).isTrue();

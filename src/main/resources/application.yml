@@ -34,6 +34,7 @@ spring:
     clean-disabled: true
     placeholders:
       app_role: ${spring.datasource.username}
+      cdc_role: ${GC_CDC_ROLE:gc_cdc}
 
 # SPEC-PLAT-01 D1: API docs off by default; the local profile turns them on.
 springdoc:
