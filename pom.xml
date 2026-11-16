@@ -3,14 +3,33 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
+  <!-- ADR-017: an independent service; the shared build and libraries come by version from GitHub Packages. -->
   <parent>
     <groupId>com.growercare</groupId>
-    <artifactId>gc-backend</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
-    <relativePath>../../pom.xml</relativePath>
+    <artifactId>gc-parent</artifactId>
+    <version>1.0.0</version>
+    <relativePath/>
   </parent>
+
   <artifactId>identity-access-service</artifactId>
+  <version>${revision}</version>
   <name>identity-access-service</name>
+  <description>Users, partner organisations, role grants and effective principals for GrowerCare</description>
+
+  <properties>
+    <revision>1.0.0-SNAPSHOT</revision>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>github</id>
+      <name>GitHub Packages (growercare-platform-libs)</name>
+      <url>https://maven.pkg.github.com/manjunathyadavs1998/growercare-platform-libs</url>
+      <releases><enabled>true</enabled></releases>
+      <snapshots><enabled>false</enabled></snapshots>
+    </repository>
+  </repositories>
 
   <dependencies>
     <dependency><groupId>org.springdoc</groupId><artifactId>springdoc-openapi-starter-webmvc-ui</artifactId></dependency>
@@ -34,6 +53,16 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+      <!-- Image: mvn package jib:dockerBuild (local) · CI: jib:build to GHCR (SPEC-PLAT-06 R79) -->
+      <plugin>
+        <groupId>com.google.cloud.tools</groupId>
+        <artifactId>jib-maven-plugin</artifactId>
+        <configuration>
+          <container>
+            <ports><port>8081</port></ports>
+          </container>
+        </configuration>
       </plugin>
     </plugins>
   </build>
