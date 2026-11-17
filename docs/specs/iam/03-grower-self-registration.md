@@ -7,7 +7,7 @@
 ## 0. Decisions (to agree with this spec)
 | # | Decision | Why |
 |---|---|---|
-| D1 | **Keycloak's own registration page creates the login.** Realm `growercare`: `registrationAllowed: true`; the username is the phone in E.164 (`+919876543210`), enforced by a user-profile validator; a password policy (8+ characters). No email needed | Standard, hosted, no custom login code (agreed: "Keycloak + IAM on first login") |
+| D1 | **Keycloak's own registration page creates the login.** Realm `growercare`: `registrationAllowed: true`; the username is the phone in E.164 (`+919876543210`), enforced by a user-profile validator; the realm's existing password policy applies (10+ characters, a digit, an uppercase letter, a special character, not the username). No email needed | Standard, hosted, no custom login code (agreed: "Keycloak + IAM on first login") |
 | D2 | **IAM creates the GrowerCare account on the first call.** Right after sign-up the grower app calls `POST /self-registration {countryCode, displayName}` with its token. IAM accepts that one route for a valid token whose subject has **no** IAM user yet (every other route still needs one) | Keycloak knows identities, IAM knows grants; nothing else may skip IAM |
 | D3 | **Self-registration only ever creates a GROWER** with one `GROWER` grant (scope OWN) in the chosen country, granted by "system" with reason `self-registration`. Staff and partners are never self-provisioned (admins create them: IAM-02) | Least privilege: a public sign-up can never yield staff power |
 | D4 | **The country must match the phone:** the username's calling code must be the country's (`ref` data `iam.country.calling_code`: IN +91, BR +55), and the country must be active | One account per country (data residency); no "Indian phone, Brazil account" |
@@ -48,7 +48,7 @@ POST /self-registration   {countryCode, displayName}   →  201|200 Me (as GET /
 ## 4. Data & events
 - V9: `iam.country.calling_code` (IN `91`, BR `55`); the check "phone HMAC and last 4 together" becomes "an HMAC needs its last 4" (D5: last 4 alone); audit action `user.self-register`.
 - Outbox `iam.grant.created` (existing event type, the new grant).
-- Keycloak realm (local-platform): `registrationAllowed: true`, user-profile validator on `username`, password policy; `gc-web` client unchanged (PKCE).
+- Keycloak realm (local-platform): `registrationAllowed: true`, user-profile validator on `username` (`keycloak/configure-registration.sh`); the existing password policy is kept; `gc-web` client unchanged (PKCE).
 
 ## 5. Security
 | Concern | Rule |
