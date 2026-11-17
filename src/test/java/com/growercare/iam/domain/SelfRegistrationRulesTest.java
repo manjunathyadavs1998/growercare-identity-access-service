@@ -45,13 +45,19 @@ class SelfRegistrationRulesTest {
         }
     }
 
-    @ParameterizedTest(name = "IAM-E63 name \"{0}\" valid: {1}")
-    @CsvSource(textBlock = """
-            Asha Pawar,     true
-            '  Asha  ',     true
-            '   ',          false
-            ''              , false
-            """)
+    static java.util.stream.Stream<org.junit.jupiter.params.provider.Arguments> names() {
+        return java.util.stream.Stream.of(
+                org.junit.jupiter.params.provider.Arguments.argumentSet("IAM-E63 an ordinary name", "Asha Pawar", true),
+                org.junit.jupiter.params.provider.Arguments.argumentSet("IAM-E63 surrounding spaces are stripped", "  Asha  ", true),
+                org.junit.jupiter.params.provider.Arguments.argumentSet("IAM-E63 120 characters (the limit)", "a".repeat(120), true),
+                org.junit.jupiter.params.provider.Arguments.argumentSet("IAM-E63 121 characters", "a".repeat(121), false),
+                org.junit.jupiter.params.provider.Arguments.argumentSet("IAM-E63 a control character", "A\u0000", false),
+                org.junit.jupiter.params.provider.Arguments.argumentSet("IAM-E63 blank", "   ", false),
+                org.junit.jupiter.params.provider.Arguments.argumentSet("IAM-E63 empty", "", false));
+    }
+
+    @ParameterizedTest
+    @org.junit.jupiter.params.provider.MethodSource("names")
     void displayNames(String name, boolean valid) {
         if (valid) {
             assertThat(SelfRegistrationRules.displayName(name)).isEqualTo(name.strip());
