@@ -136,13 +136,13 @@ class JdbcAccessRepository implements AccessRepository {
 
     @Override
     public StoredGrant insertGrant(long userId, String roleCode, GeoScopeRequest geo, Set<String> buCodes, Instant validTo,
-                                   long grantedBy, String reason) {
+                                   Long grantedBy, String reason) {
         record Inserted(long grantId, Instant validFrom) { }
         var inserted = jdbc.sql(sql.get("grant.insertGrant"))
                 .param("userId", userId)
                 .param("roleCode", roleCode)
                 .param("validTo", validTo == null ? null : OffsetDateTime.ofInstant(validTo, java.time.ZoneOffset.UTC))
-                .param("grantedBy", grantedBy)
+                .param("grantedBy", grantedBy, java.sql.Types.BIGINT)
                 .param("reason", reason)
                 .query((rs, n) -> new Inserted(rs.getLong("grant_id"), instant(rs, "valid_from")))
                 .single();
@@ -152,6 +152,19 @@ class JdbcAccessRepository implements AccessRepository {
         geo.territoryIds().forEach(t -> geoRow(insertScope, inserted.grantId(), null, null, t));
         buCodes.forEach(bu -> jdbc.sql(sql.get("grant.insertBuScope")).param("grantId", inserted.grantId()).param("buCode", bu).update());
         return new StoredGrant(inserted.grantId(), userId, roleCode, inserted.validFrom(), validTo, grantedBy, null, geo, buCodes);
+    }
+
+    @Override
+    public Optional<String> callingCode(String countryCode) {
+        return jdbc.sql(sql.get("grant.callingCode")).param("countryCode", countryCode).query(String.class).optional();
+    }
+
+    @Override
+    public Optional<Long> insertSelfRegisteredUser(UUID subject, String countryCode, String displayName, String phoneLast4) {
+        return jdbc.sql(sql.get("grant.insertSelfRegisteredUser"))
+                .param("subject", subject).param("countryCode", countryCode).param("displayName", displayName)
+                .param("phoneLast4", phoneLast4)
+                .query(Long.class).optional();
     }
 
     @Override

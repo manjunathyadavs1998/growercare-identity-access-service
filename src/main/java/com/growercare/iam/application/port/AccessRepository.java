@@ -38,9 +38,15 @@ public interface AccessRepository {
 
     Set<String> existingBusinessUnits(Set<String> buCodes);
 
-    /** Inserts the grant and its geo/BU scope rows; returns the stored grant. */
+    /** Inserts the grant and its geo/BU scope rows; returns the stored grant. {@code grantedBy} null = the system. */
     StoredGrant insertGrant(long userId, String roleCode, GeoScopeRequest geo, Set<String> buCodes, Instant validTo,
-                            long grantedBy, String reason);
+                            Long grantedBy, String reason);
+
+    /** SPEC-IAM-03 D4: the calling code of an active country (e.g. "91"), empty for unknown or inactive countries. */
+    Optional<String> callingCode(String countryCode);
+
+    /** SPEC-IAM-03 D2: a GROWER account; empty when a concurrent first call for the same subject won. */
+    Optional<Long> insertSelfRegisteredUser(UUID subject, String countryCode, String displayName, String phoneLast4);
 
     Optional<StoredGrant> findGrant(long grantId);
 

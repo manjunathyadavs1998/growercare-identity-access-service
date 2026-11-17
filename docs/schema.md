@@ -81,3 +81,4 @@ erDiagram
 - V6: permission `case:attach` granted to every role with public/partner comment rights (SPEC-CASE-05 D8).
 - V7: permissions `grower:create`, `grower:read`, `grower:update` for growers, retailers (create/read), field staff and care agents (SPEC-GRW-01 D7).
 - V8: permission `grower:consent` (OTP verification and consent, assisted onboarding) for growers, retailers, field staff and care agents (SPEC-GRW-03 D7).
+- V9: `country.calling_code` (IN 91, BR 55) and the phone check relaxed to "an HMAC needs its last 4", so self-registered growers carry only the last 4 digits (SPEC-IAM-03).
