@@ -36,7 +36,7 @@ class IamSchemaMigrationIT {
     @Test
     void everyRoleHasPermissionsAndNoMappingWasSilentlyDropped() {
         int mappings = app.sql("SELECT count(*) FROM iam.role_permission").query(Integer.class).single();
-        assertThat(mappings).isEqualTo(115);  // 90 (V4) + 9 case:attach (V6) + 16 grower:* (V7, SPEC-GRW-01 D7); a typo would lower it
+        assertThat(mappings).isEqualTo(121);  // 90 (V4) + 9 case:attach (V6) + 16 grower:* (V7) + 6 grower:consent (V8, SPEC-GRW-03 D7)
         var rolesWithout = app.sql("""
                 SELECT r.role_code FROM iam.role r
                  WHERE NOT EXISTS (SELECT 1 FROM iam.role_permission rp WHERE rp.role_code = r.role_code)""")
@@ -44,16 +44,16 @@ class IamSchemaMigrationIT {
         assertThat(rolesWithout).isEmpty();
     }
 
-    /** SPEC-GRW-01 D7 (growercare-grower-service): which roles may create, read and update growers. */
+    /** SPEC-GRW-01 D7 and SPEC-GRW-03 D7 (growercare-grower-service): which roles hold which grower permissions. */
     @ParameterizedTest(name = "GRW-D7 {0} → {1}")
     @CsvSource(textBlock = """
             # role,               grower permissions (sorted, '|'-separated; empty = none)
-            GROWER,               grower:create|grower:read|grower:update
-            RETAILER_USER,        grower:create|grower:read
-            RETAILER_ADMIN,       grower:create|grower:read
-            FIELD_AGRONOMIST,     grower:create|grower:read|grower:update
-            TERRITORY_MANAGER,    grower:create|grower:read|grower:update
-            CARE_AGENT,           grower:create|grower:read|grower:update
+            GROWER,               grower:consent|grower:create|grower:read|grower:update
+            RETAILER_USER,        grower:consent|grower:create|grower:read
+            RETAILER_ADMIN,       grower:consent|grower:create|grower:read
+            FIELD_AGRONOMIST,     grower:consent|grower:create|grower:read|grower:update
+            TERRITORY_MANAGER,    grower:consent|grower:create|grower:read|grower:update
+            CARE_AGENT,           grower:consent|grower:create|grower:read|grower:update
             DISTRIBUTOR_USER,     ''
             COUNTRY_ADMIN,        ''
             GLOBAL_PLATFORM_ADMIN,''
