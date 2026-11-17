@@ -80,3 +80,4 @@ erDiagram
 - Publication `gc_outbox` = `iam.outbox` + `iam.cdc_heartbeat`, insert/update only; role `${cdc_role}` reads the outbox and upserts the heartbeat.
 - V6: permission `case:attach` granted to every role with public/partner comment rights (SPEC-CASE-05 D8).
 - V7: permissions `grower:create`, `grower:read`, `grower:update` for growers, retailers (create/read), field staff and care agents (SPEC-GRW-01 D7).
+- V8: permission `grower:consent` (OTP verification and consent, assisted onboarding) for growers, retailers, field staff and care agents (SPEC-GRW-03 D7).
