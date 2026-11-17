@@ -194,12 +194,20 @@ class SelfRegistrationIT {
         register(authorization, "IN", "Test").andExpect(status().is(expected));
     }
 
-    @Test
-    void IAM_E68_aSuspendedAccountIsNotRevived() throws Exception {
+    static Stream<Arguments> blocked() {
+        return Stream.of(
+                argumentSet("IAM-E68 suspended, same country", "SUSPENDED", "IN"),
+                argumentSet("IAM-E68 suspended, another country (no 409 that would reveal IN)", "SUSPENDED", "BR"),
+                argumentSet("IAM-E68 deactivated, same country", "DEACTIVATED", "IN"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("blocked")
+    void aBlockedAccountIsNeverRevived(String accountStatus, String country) throws Exception {
         var subject = newSubject(indianPhone());
         var token = TestJwts.user(subject).bearer();
-        register(token, "IN", "Suspended Grower").andExpect(status().isCreated());
-        owner.sql("UPDATE iam.user_account SET status = 'SUSPENDED' WHERE external_subject = ?").param(subject).update();
-        problem(register(token, "IN", "Suspended Grower"), 403, "PERMISSION_DENIED");
+        register(token, "IN", "Blocked Grower").andExpect(status().isCreated());
+        owner.sql("UPDATE iam.user_account SET status = ? WHERE external_subject = ?").params(accountStatus, subject).update();
+        problem(register(token, country, "Blocked Grower"), 403, "PERMISSION_DENIED");
     }
 }

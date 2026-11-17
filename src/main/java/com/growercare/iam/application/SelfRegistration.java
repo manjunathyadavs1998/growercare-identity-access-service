@@ -81,12 +81,16 @@ public class SelfRegistration {
         return new Result(principals.resolve(subject).orElseThrow(), true);
     }
 
-    /** R61: the same subject again → its account; another country → 409 (the country is fixed once chosen). */
+    /**
+     * R61/R67: the same subject again → its account; another country → 409 (the country is fixed once chosen). A suspended
+     * or deactivated account resolves to no principal and is 403 first, whatever country it asks for, so a blocked
+     * account learns nothing (not even its country) and is never revived.
+     */
     private Result replay(String homeCountry, String requested, UUID subject) {
+        var principal = principals.resolve(subject).orElseThrow(() -> new PermissionDeniedException("self-registration"));
         if (!homeCountry.equals(requested)) {
             throw new ConflictException(ErrorCode.DUPLICATE, "This account is already registered in " + homeCountry);
         }
-        // R67: a suspended or deactivated account resolves to no principal; self-registration never revives it
-        return new Result(principals.resolve(subject).orElseThrow(() -> new PermissionDeniedException("self-registration")), false);
+        return new Result(principal, false);
     }
 }

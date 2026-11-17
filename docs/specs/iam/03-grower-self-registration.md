@@ -37,7 +37,7 @@
 | IAM-E64 | R64 | none · garbage · case-service client token | 401 · 401 · 403 |
 | IAM-E65 | R65 | unprovisioned subject calls `GET /me` | 401 |
 | IAM-E66 | R66 | after E60: `GET /me`; `GET /cases` on case-service (cache warmed with the unknown answer before) | 200; 200 (empty list) |
-| IAM-E68 | R67 | a suspended grower's subject registers again | 403 |
+| IAM-E68 | R67 | a suspended grower registers again (same country · another country) · a deactivated one | 403 (all three; checked before the country, so no 409 reveals the account's country) |
 | IAM-E67 | **smoke** (PRD J1) | Keycloak admin API creates a user like the registration page would; the user self-registers, registers as a grower (SPEC-GRW-01 R10), confirms the code (SPEC-GRW-03) | grower ACTIVE; the user raises a case |
 
 ## 3. API contract
