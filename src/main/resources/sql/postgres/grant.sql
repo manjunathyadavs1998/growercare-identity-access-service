@@ -80,3 +80,14 @@ UPDATE iam.role_grant
    SET revoked_at = now(), revoked_by_user_id = :revokedBy, revoke_reason = :reason, version = version + 1
  WHERE grant_id = :grantId AND revoked_at IS NULL
 RETURNING version
+
+-- SPEC-IAM-03 D4: the calling code of an active country.
+-- name: callingCode
+SELECT c.calling_code FROM iam.country c WHERE c.country_code = :countryCode AND c.active
+
+-- SPEC-IAM-03 D2/D6: a self-registered grower; a concurrent first call for the same subject inserts nothing.
+-- name: insertSelfRegisteredUser
+INSERT INTO iam.user_account (external_subject, user_type, home_country_code, display_name, phone_last4)
+VALUES (:subject, 'GROWER', :countryCode, :displayName, :phoneLast4)
+ON CONFLICT (external_subject) DO NOTHING
+RETURNING user_id

@@ -273,6 +273,17 @@
           }
         },
         "type" : "object"
+      },
+      "SelfRegistrationRequest" : {
+        "properties" : {
+          "countryCode" : {
+            "type" : "string"
+          },
+          "displayName" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
       }
     },
     "securitySchemes" : {
@@ -424,6 +435,34 @@
           }
         },
         "tags" : [ "grant-controller" ]
+      }
+    },
+    "/self-registration" : {
+      "post" : {
+        "operationId" : "register",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SelfRegistrationRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MeView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "self-registration-controller" ]
       }
     },
     "/users/{userId}/grants" : {
