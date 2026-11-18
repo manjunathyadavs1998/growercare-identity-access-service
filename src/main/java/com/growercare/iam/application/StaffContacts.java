@@ -36,7 +36,7 @@ public class StaffContacts {
 
     /** R120: for staff callers only: the STAFF among {@code ids} whose home country their case:read / dashboard:read grants cover. */
     @Transactional(readOnly = true)
-    public List<StaffName> names(List<Long> ids) {
+    public List<StaffName> names(String rawIds) {
         var principal = CurrentPrincipal.require();
         if (principal.userType() != com.growercare.security.UserType.STAFF) {
             throw new PermissionDeniedException("case:read or dashboard:read (staff)");     // growers hold case:read too
@@ -47,6 +47,7 @@ public class StaffContacts {
             throw new PermissionDeniedException("case:read or dashboard:read");
         }
         // authorised first, then the input is checked: a non-staff caller always gets 403 (review)
+        var ids = parseIds(rawIds);
         if (ids.isEmpty() || ids.size() > MAX_IDS) {
             throw ValidationException.of("ids", "between 1 and " + MAX_IDS + " ids");
         }
@@ -58,7 +59,27 @@ public class StaffContacts {
                 countries.addAll(access.territoryCountries(g.territories()).values());
             }
         }
-        return directory.staffNames(new HashSet<>(ids)).stream().filter(s -> global || countries.contains(s.homeCountry())).toList();
+        return directory.staffNames(ids).stream().filter(s -> global || countries.contains(s.homeCountry())).toList();
+    }
+
+    /** Comma-separated positive ids, duplicates dropped; anything else is a 400 on {@code ids}. */
+    static Set<Long> parseIds(String raw) {
+        var ids = new java.util.LinkedHashSet<Long>();
+        for (var part : raw.split(",")) {
+            var text = part.strip();
+            if (text.isEmpty()) {
+                continue;
+            }
+            if (!text.matches("^[1-9][0-9]{0,18}$")) {
+                throw ValidationException.of("ids", "comma-separated positive ids");
+            }
+            try {
+                ids.add(Long.parseLong(text));
+            } catch (NumberFormatException e) {
+                throw ValidationException.of("ids", "comma-separated positive ids");
+            }
+        }
+        return ids;
     }
 
     /** R122: ACTIVE staff or partner users with an email; growers, inactive, unknown and email-less users are 404. */

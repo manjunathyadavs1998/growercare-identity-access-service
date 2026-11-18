@@ -1,7 +1,6 @@
 package com.growercare.iam.adapters.in.web;
 
 import com.growercare.common.error.NotFoundException;
-import com.growercare.common.error.ValidationException;
 import com.growercare.iam.application.StaffContacts;
 import java.util.List;
 import org.springframework.http.CacheControl;
@@ -30,26 +29,8 @@ class StaffContactController {
     /** R120/R121: `ids` is a comma-separated list of user ids (≤ 100). */
     @GetMapping("/users/names")
     List<StaffNameView> names(@RequestParam String ids) {
-        var parsed = new java.util.LinkedHashSet<Long>();
-        for (var part : ids.split(",")) {
-            var text = part.strip();
-            if (text.isEmpty()) {
-                continue;
-            }
-            parsed.add(parseId(text));
-        }
-        return contacts.names(List.copyOf(parsed)).stream().map(s -> new StaffNameView(Long.toString(s.userId()), s.displayName())).toList();
-    }
-
-    private static long parseId(String text) {
-        if (!text.matches(IamDtos.ID)) {
-            throw ValidationException.of("ids", "comma-separated positive ids");
-        }
-        try {
-            return Long.parseLong(text);
-        } catch (NumberFormatException e) {
-            throw ValidationException.of("ids", "comma-separated positive ids");
-        }
+        // parsed by the service after the permission check: a non-staff caller always gets 403 (review)
+        return contacts.names(ids).stream().map(s -> new StaffNameView(Long.toString(s.userId()), s.displayName())).toList();
     }
 
     /** R122/R123: only allow-listed contact clients (on top of the /internal/** service-token rule). */

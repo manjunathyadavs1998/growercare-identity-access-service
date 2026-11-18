@@ -91,7 +91,8 @@ class StaffNamesAndContactIT {
         return Stream.of(
                 argumentSet("IAM-E121 a grower (holds case:read, but is not staff)", TestJwts.GROWER_IN1, "102", 403),
                 argumentSet("IAM-E121 more than 100 ids", TestJwts.TM_IN, tooMany, 400),
-                argumentSet("IAM-E121 a malformed id", TestJwts.TM_IN, "abc", 400));
+                argumentSet("IAM-E121 a malformed id", TestJwts.TM_IN, "abc", 400),
+                argumentSet("IAM-E121 a grower with a malformed id is still 403 (authorised first)", TestJwts.GROWER_IN1, "abc", 403));
     }
 
     @ParameterizedTest
