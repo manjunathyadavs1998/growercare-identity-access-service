@@ -18,6 +18,23 @@
         },
         "type" : "object"
       },
+      "ContactView" : {
+        "properties" : {
+          "displayName" : {
+            "type" : "string"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "language" : {
+            "type" : "string"
+          },
+          "userId" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "CreateGrantRequest" : {
         "properties" : {
           "buCodes" : {
@@ -319,6 +336,17 @@
         },
         "type" : "object"
       },
+      "StaffNameView" : {
+        "properties" : {
+          "displayName" : {
+            "type" : "string"
+          },
+          "userId" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "TerritoryView" : {
         "properties" : {
           "code" : {
@@ -490,6 +518,32 @@
           }
         },
         "tags" : [ "grant-controller" ]
+      }
+    },
+    "/internal/users/by-id/{userId}/contact" : {
+      "get" : {
+        "operationId" : "contact",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "userId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ContactView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "staff-contact-controller" ]
       }
     },
     "/internal/users/by-id/{userId}/principal" : {
@@ -748,6 +802,35 @@
           }
         },
         "tags" : [ "reference-controller" ]
+      }
+    },
+    "/users/names" : {
+      "get" : {
+        "operationId" : "names",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "ids",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/StaffNameView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "staff-contact-controller" ]
       }
     },
     "/users/{userId}" : {

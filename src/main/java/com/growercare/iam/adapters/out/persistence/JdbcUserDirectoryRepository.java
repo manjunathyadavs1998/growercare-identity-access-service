@@ -54,6 +54,24 @@ class JdbcUserDirectoryRepository implements UserDirectoryRepository {
         return jdbc.sql(sql.get("directory.user")).param("userId", userId).query(USER).optional();
     }
 
+    @Override
+    public List<StaffName> staffNames(java.util.Collection<Long> ids) {
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+        return jdbc.sql(sql.get("directory.staffNames")).param("ids", List.copyOf(ids))
+                .query((rs, i) -> new StaffName(rs.getLong("user_id"), rs.getString("display_name"), rs.getString("home_country_code")))
+                .list();
+    }
+
+    @Override
+    public Optional<Contact> contact(long userId) {
+        return jdbc.sql(sql.get("directory.contact")).param("userId", userId)
+                .query((rs, i) -> new Contact(rs.getLong("user_id"), rs.getString("user_type"), rs.getString("status"),
+                        rs.getString("email"), rs.getString("display_name")))
+                .optional();
+    }
+
     private static List<String> orNone(Set<String> values) {
         return values.isEmpty() ? NONE : List.copyOf(values);
     }

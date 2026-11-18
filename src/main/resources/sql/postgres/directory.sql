@@ -23,3 +23,16 @@ SELECT u.user_id, u.user_type, u.home_country_code, u.partner_org_id, u.display_
 SELECT u.user_id, u.user_type, u.home_country_code, u.partner_org_id, u.display_name, u.phone_last4, u.status
   FROM iam.user_account u
  WHERE u.user_id = :userId
+
+-- SPEC-IAM-05 R120: staff names by id (the caller's country scope is applied by the service).
+-- name: staffNames
+SELECT u.user_id, u.display_name, u.home_country_code
+  FROM iam.user_account u
+ WHERE u.user_id IN (:ids) AND u.user_type = 'STAFF'
+ ORDER BY u.user_id
+
+-- SPEC-IAM-05 R122: a staff or partner user's contact for notifications.
+-- name: contact
+SELECT u.user_id, u.user_type, u.status, u.email, u.display_name
+  FROM iam.user_account u
+ WHERE u.user_id = :userId
