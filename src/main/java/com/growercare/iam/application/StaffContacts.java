@@ -47,7 +47,7 @@ public class StaffContacts {
             throw new PermissionDeniedException("case:read or dashboard:read");
         }
         // authorised first, then the input is checked: a non-staff caller always gets 403 (review)
-        var ids = parseIds(rawIds);
+        var ids = parseIds(rawIds == null ? "" : rawIds);
         if (ids.isEmpty() || ids.size() > MAX_IDS) {
             throw ValidationException.of("ids", "between 1 and " + MAX_IDS + " ids");
         }

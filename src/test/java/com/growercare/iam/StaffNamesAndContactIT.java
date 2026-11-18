@@ -74,6 +74,10 @@ class StaffNamesAndContactIT {
                 INSERT INTO iam.user_account (user_id, external_subject, user_type, home_country_code, display_name, email)
                 VALUES (966, ?, 'STAFF', 'IN', 'Global Exec', 'exec.test@growercare.test') ON CONFLICT DO NOTHING""").param(GLOBAL_EXEC).update();
         owner.sql("INSERT INTO iam.role_grant (grant_id, user_id, role_code, grant_reason) VALUES (966, 966, 'GLOBAL_EXECUTIVE', 'test: IAM-E120') ON CONFLICT DO NOTHING").update();
+        owner.sql("""
+                INSERT INTO iam.user_account (user_id, external_subject, user_type, home_country_code, display_name, email, status)
+                VALUES (967, '6f1c0a10-0967-4a00-8000-000000000967', 'STAFF', 'IN', 'Suspended Staff', 'suspended.test@growercare.test', 'SUSPENDED')
+                ON CONFLICT DO NOTHING""").update();
     }
 
     ResultActions call(String path, String bearer) throws Exception {
@@ -102,7 +106,8 @@ class StaffNamesAndContactIT {
                 argumentSet("IAM-E121 more than 100 ids", TestJwts.TM_IN, tooMany, 400),
                 argumentSet("IAM-E121 a malformed id", TestJwts.TM_IN, "abc", 400),
                 argumentSet("IAM-E121 a grower with a malformed id is still 403 (authorised first)", TestJwts.GROWER_IN1, "abc", 403),
-                argumentSet("IAM-E121 staff with neither permission (admin.in: user:read, no case:read)", TestJwts.ADMIN_IN, "102", 403));
+                argumentSet("IAM-E121 staff with neither permission (admin.in: user:read, no case:read)", TestJwts.ADMIN_IN, "102", 403),
+                argumentSet("IAM-E121 a grower without ids is still 403 (authorised first)", TestJwts.GROWER_IN1, "", 403));
     }
 
     @ParameterizedTest
@@ -118,7 +123,8 @@ class StaffNamesAndContactIT {
                 argumentSet("IAM-E122 a grower", "1", 404, null, null),
                 argumentSet("IAM-E122 unknown", "999999", 404, null, null),
                 argumentSet("IAM-E122 malformed", "abc", 404, null, null),
-                argumentSet("IAM-E122 staff without an email", "965", 404, null, null));
+                argumentSet("IAM-E122 staff without an email", "965", 404, null, null),
+                argumentSet("IAM-E122 a suspended staff user", "967", 404, null, null));
     }
 
     @ParameterizedTest

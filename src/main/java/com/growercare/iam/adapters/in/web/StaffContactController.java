@@ -28,7 +28,7 @@ class StaffContactController {
 
     /** R120/R121: `ids` is a comma-separated list of user ids (≤ 100). */
     @GetMapping("/users/names")
-    List<StaffNameView> names(@RequestParam String ids) {
+    List<StaffNameView> names(@RequestParam(required = false) String ids) {
         // parsed by the service after the permission check: a non-staff caller always gets 403 (review)
         return contacts.names(ids).stream().map(s -> new StaffNameView(Long.toString(s.userId()), s.displayName())).toList();
     }
