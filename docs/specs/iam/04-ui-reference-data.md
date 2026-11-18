@@ -26,6 +26,7 @@
 | Example | Rule | Actor | Input | Expected |
 |---|---|---|---|---|
 | IAM-E100 | R100 | grower.in1 | (no country) | India: Maharashtra › Pune, Nashik; Karnataka › Bengaluru Rural |
+| IAM-E101b | R100 | a test care agent at home in India with a CARE_AGENT grant for Brazil | `country=BR` | 200 Brazil's territories (covered by a grant) |
 | IAM-E101 | R101 | grower.in1 · care.in | `country=BR` · `country=XX` | 404 · 404 |
 | IAM-E102 | R102 | admin.in (COUNTRY_ADMIN, level 60) | — | includes CARE_AGENT, FIELD_AGRONOMIST, TERRITORY_MANAGER, COUNTRY_ADMIN (same level is allowed by SPEC-IAM-01); excludes DPO (65), REGIONAL_ADMIN (70), GLOBAL_PLATFORM_ADMIN (90) |
 | IAM-E103 | R103 | care.in | — | 403 |
@@ -44,4 +45,4 @@ GET /users/assignable?territoryId=&buCode= 200 [{userId, displayName, roleCodes[
 ## 6. Traceability
 | Rule / Example | Test |
 |---|---|
-| R100–R106 / E100–E106, E105b | `UiReferenceDataIT` |
+| R100–R106 / E100–E106, E101b, E105b | `UiReferenceDataIT` |

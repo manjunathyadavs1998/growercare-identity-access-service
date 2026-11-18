@@ -76,6 +76,22 @@ class UiReferenceDataIT {
         owner.sql("INSERT INTO iam.role_grant (grant_id, user_id, role_code, grant_reason) VALUES (963, 963, 'TERRITORY_MANAGER', 'test: IAM-E105b') ON CONFLICT DO NOTHING").update();
         owner.sql("INSERT INTO iam.grant_geo_scope (grant_id, territory_id) VALUES (963, 1002) ON CONFLICT DO NOTHING").update();
         owner.sql("INSERT INTO iam.grant_bu_scope (grant_id, bu_code) VALUES (963, 'SEEDS') ON CONFLICT DO NOTHING").update();
+        // IAM-E101b: at home in India, a CARE_AGENT grant for Brazil
+        owner.sql("""
+                INSERT INTO iam.user_account (user_id, external_subject, user_type, home_country_code, display_name, email)
+                VALUES (964, ?, 'STAFF', 'IN', 'Cross-border Care', 'care.xb.test@growercare.test') ON CONFLICT DO NOTHING""")
+                .param(CARE_IN_FOR_BR).update();
+        owner.sql("INSERT INTO iam.role_grant (grant_id, user_id, role_code, grant_reason) VALUES (964, 964, 'CARE_AGENT', 'test: IAM-E101b') ON CONFLICT DO NOTHING").update();
+        owner.sql("INSERT INTO iam.grant_geo_scope (grant_id, country_code) VALUES (964, 'BR') ON CONFLICT DO NOTHING").update();
+    }
+
+    static final UUID CARE_IN_FOR_BR = UUID.fromString("6f1c0a10-0964-4a00-8000-000000000964");
+
+    @Test
+    void IAM_E101b_aCountryCoveredByAGrantIsVisible() throws Exception {
+        call(get("/reference/territories").param("country", "BR"), CARE_IN_FOR_BR).andExpect(status().isOk())
+                .andExpect(jsonPath("$[*].territoryId", hasItem("2002")));
+        call(get("/reference/territories").param("country", "IN"), CARE_IN_FOR_BR).andExpect(status().isOk());
     }
 
     @ParameterizedTest(name = "{0}")
