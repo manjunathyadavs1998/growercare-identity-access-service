@@ -1,6 +1,23 @@
 {
   "components" : {
     "schemas" : {
+      "AssignableView" : {
+        "properties" : {
+          "displayName" : {
+            "type" : "string"
+          },
+          "roleCodes" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "userId" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "CreateGrantRequest" : {
         "properties" : {
           "buCodes" : {
@@ -274,12 +291,49 @@
         },
         "type" : "object"
       },
+      "RoleView" : {
+        "properties" : {
+          "allowedUserType" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "roleCode" : {
+            "type" : "string"
+          },
+          "scopeKind" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "SelfRegistrationRequest" : {
         "properties" : {
           "countryCode" : {
             "type" : "string"
           },
           "displayName" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "TerritoryView" : {
+        "properties" : {
+          "code" : {
+            "type" : "string"
+          },
+          "level" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "parentTerritoryId" : {
+            "type" : "string"
+          },
+          "territoryId" : {
             "type" : "string"
           }
         },
@@ -509,6 +563,57 @@
         "tags" : [ "grant-controller" ]
       }
     },
+    "/reference/roles" : {
+      "get" : {
+        "operationId" : "roles",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/RoleView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "reference-controller" ]
+      }
+    },
+    "/reference/territories" : {
+      "get" : {
+        "operationId" : "territories",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "country",
+          "required" : false,
+          "schema" : {
+            "pattern" : "^[A-Z]{2}$",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/TerritoryView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "reference-controller" ]
+      }
+    },
     "/self-registration" : {
       "post" : {
         "operationId" : "register",
@@ -605,6 +710,44 @@
           }
         },
         "tags" : [ "user-directory-controller" ]
+      }
+    },
+    "/users/assignable" : {
+      "get" : {
+        "operationId" : "assignable",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "territoryId",
+          "required" : true,
+          "schema" : {
+            "pattern" : "^[1-9][0-9]{0,18}$",
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "buCode",
+          "required" : true,
+          "schema" : {
+            "pattern" : "^[A-Z][A-Z0-9_]{1,15}$",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/AssignableView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "reference-controller" ]
       }
     },
     "/users/{userId}" : {

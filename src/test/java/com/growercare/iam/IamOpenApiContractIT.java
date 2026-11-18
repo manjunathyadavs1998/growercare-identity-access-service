@@ -55,7 +55,10 @@ class IamOpenApiContractIT {
                 argumentSet("PLAT-E20d GET /users/{userId}/grants", "/users/{userId}/grants", "get"),
                 argumentSet("PLAT-E20e POST /self-registration (SPEC-IAM-03)", "/self-registration", "post"),
                 argumentSet("IAM-E80 GET /users (SPEC-IAM-02)", "/users", "get"),
-                argumentSet("IAM-E81 GET /users/{userId} (SPEC-IAM-02)", "/users/{userId}", "get"));
+                argumentSet("IAM-E81 GET /users/{userId} (SPEC-IAM-02)", "/users/{userId}", "get"),
+                argumentSet("IAM-E100 GET /reference/territories (SPEC-IAM-04)", "/reference/territories", "get"),
+                argumentSet("IAM-E102 GET /reference/roles (SPEC-IAM-04)", "/reference/roles", "get"),
+                argumentSet("IAM-E104 GET /users/assignable (SPEC-IAM-04)", "/users/assignable", "get"));
     }
 
     @ParameterizedTest
