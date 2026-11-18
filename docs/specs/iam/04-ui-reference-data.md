@@ -19,7 +19,7 @@
 | IAM-R102 | admin with `grant:create` | `GET /reference/roles` | 200 every role whose level ≤ the highest level among the admin's `grant:create` grants, ordered by level then code |
 | IAM-R103 | no `grant:create` | roles | 403 |
 | IAM-R104 | `case:assign` | `GET /users/assignable?territoryId=T&buCode=B` | 200 ACTIVE staff with a `case:transition` grant covering T and B, by display name |
-| IAM-R105 | T outside the caller's `case:assign` scope · unknown | assignable | 404 |
+| IAM-R105 | no `case:assign` grant of the caller covers both T (geo) and B (BU) · T unknown | assignable | 404 |
 | IAM-R106 | no `case:assign` | assignable | 403 |
 
 ## 2. Examples
@@ -31,6 +31,7 @@
 | IAM-E103 | R103 | care.in | — | 403 |
 | IAM-E104 | R104 | care.in | Pune 1002, CP | agro.in (Vikram Agro), tm.in (Kiran Territory), care.in; not care.br |
 | IAM-E105 | R105 | care.in · tm.in | 999999 · Bengaluru Rural 1005 | 404 · 404 |
+| IAM-E105b | R105 | a test territory manager for Pune limited to BU SEEDS | Pune 1002 with CP · with SEEDS | 404 · 200 |
 | IAM-E106 | R106 | agro.in · grower.in1 | 1002, CP | 403 |
 
 ## 3. API contract
@@ -43,4 +44,4 @@ GET /users/assignable?territoryId=&buCode= 200 [{userId, displayName, roleCodes[
 ## 6. Traceability
 | Rule / Example | Test |
 |---|---|
-| R100–R106 / E100–E106 | `UiReferenceDataIT` |
+| R100–R106 / E100–E106, E105b | `UiReferenceDataIT` |

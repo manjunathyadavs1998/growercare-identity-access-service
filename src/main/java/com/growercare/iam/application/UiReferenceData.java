@@ -71,14 +71,17 @@ public class UiReferenceData {
         return reference.rolesUpTo(level);
     }
 
-    /** R104/R105: who could take a case in {@code territoryId}/{@code buCode}; the territory must be in the caller's assign scope. */
+    /**
+     * R104/R105: who could take a case in {@code territoryId}/{@code buCode}. Some {@code case:assign} grant of the caller must
+     * cover both the territory (geo) and the BU (convention 1: role + geo + BU); otherwise 404, as for any out-of-scope resource.
+     */
     @Transactional(readOnly = true)
     @RequiresPermission(PERM_CASE_ASSIGN)
     public List<AssignableStaff> assignable(long territoryId, String buCode) {
         var principal = CurrentPrincipal.require();
         var country = access.territoryCountries(Set.of(territoryId)).get(territoryId);
         boolean inScope = country != null && principal.grantsWith(PERM_CASE_ASSIGN, clock.instant())
-                .anyMatch(g -> g.scopeKind() == ScopeKind.GLOBAL || g.countries().contains(country) || g.territories().contains(territoryId));
+                .anyMatch(g -> g.coversGeo(country, territoryId) && g.coversBu(buCode));
         if (!inScope) {
             throw new NotFoundException("Territory");
         }

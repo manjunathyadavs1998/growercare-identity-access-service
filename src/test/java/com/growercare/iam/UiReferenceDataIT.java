@@ -63,6 +63,31 @@ class UiReferenceDataIT {
     @Autowired
     MockMvc mvc;
 
+    /** Test-only: a territory manager for Pune whose grant is limited to BU SEEDS (IAM-E105b). */
+    static final UUID TM_SEEDS = UUID.fromString("6f1c0a10-0963-4a00-8000-000000000963");
+
+    @org.junit.jupiter.api.BeforeEach
+    void seedsOnlyManager() {
+        var owner = org.springframework.jdbc.core.simple.JdbcClient.create(DB.ownerDataSource());
+        owner.sql("""
+                INSERT INTO iam.user_account (user_id, external_subject, user_type, home_country_code, display_name, email)
+                VALUES (963, ?, 'STAFF', 'IN', 'Seeds Manager', 'tm.seeds.test@growercare.test') ON CONFLICT DO NOTHING""")
+                .param(TM_SEEDS).update();
+        owner.sql("INSERT INTO iam.role_grant (grant_id, user_id, role_code, grant_reason) VALUES (963, 963, 'TERRITORY_MANAGER', 'test: IAM-E105b') ON CONFLICT DO NOTHING").update();
+        owner.sql("INSERT INTO iam.grant_geo_scope (grant_id, territory_id) VALUES (963, 1002) ON CONFLICT DO NOTHING").update();
+        owner.sql("INSERT INTO iam.grant_bu_scope (grant_id, bu_code) VALUES (963, 'SEEDS') ON CONFLICT DO NOTHING").update();
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @org.junit.jupiter.params.provider.CsvSource(textBlock = """
+            IAM-E105b another BU than the caller's grant,  CP,    404
+            IAM-E105b the caller's own BU,                 SEEDS, 200
+            """)
+    void theCallersBuScopeLimitsAssignableStaff(String name, String buCode, int expected) throws Exception {
+        call(get("/users/assignable").param("territoryId", "1002").param("buCode", buCode), TM_SEEDS)
+                .andExpect(status().is(expected));
+    }
+
     ResultActions call(MockHttpServletRequestBuilder request, UUID as) throws Exception {
         return mvc.perform(request.header("Authorization", TestJwts.user(as).bearer()));
     }
