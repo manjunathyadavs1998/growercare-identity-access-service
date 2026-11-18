@@ -19,13 +19,16 @@ import org.springframework.web.bind.annotation.RestController;
 class InternalPrincipalController {
 
     private final PrincipalDirectory resolver;
+    private final InternalAccess access;
 
-    InternalPrincipalController(PrincipalDirectory resolver) {
+    InternalPrincipalController(PrincipalDirectory resolver, InternalAccess access) {
         this.resolver = resolver;
+        this.access = access;
     }
 
     @GetMapping("/internal/users/{subject}/principal")
     ResponseEntity<GcPrincipal> principal(@PathVariable UUID subject) {
+        access.requirePrincipalReader();
         var principal = resolver.resolve(subject).orElseThrow(() -> new NotFoundException("User"));
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(principal);
     }
@@ -33,6 +36,7 @@ class InternalPrincipalController {
     /** IAM-R18: assignee validation by user id; malformed id → 400, unknown/inactive → 404. */
     @GetMapping("/internal/users/by-id/{userId}/principal")
     ResponseEntity<GcPrincipal> principalById(@PathVariable String userId) {
+        access.requirePrincipalReader();
         if (!userId.matches(IamDtos.ID)) {
             throw ValidationException.of("userId", "must be a positive numeric id");
         }

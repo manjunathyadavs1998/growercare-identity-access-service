@@ -14,7 +14,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -73,17 +72,18 @@ class StaffNamesAndContactIT {
         return mvc.perform(get(path).header("Authorization", bearer));
     }
 
-    @Test
-    void IAM_E120_onlyStaffInTheCallersCountriesAreNamed() throws Exception {
-        call("/users/names?ids=102,1,105", TestJwts.user(TestJwts.TM_IN).bearer()).andExpect(status().isOk())
-                .andExpect(jsonPath("$[*].userId", contains("102")))
-                .andExpect(jsonPath("$[0].displayName").value("Vikram Agro"));
+    static Stream<Arguments> named() {
+        return Stream.of(
+                argumentSet("IAM-E120 tm.in: only Indian staff (1 is a grower, 105 is Brazilian)", TestJwts.TM_IN, "102,1,105", new String[] {"102"}, "Vikram Agro"),
+                argumentSet("IAM-E120 care.in with case:read", TestJwts.CARE_IN, "101,103", new String[] {"101", "103"}, "Anita Care"));
     }
 
-    @Test
-    void IAM_E120_careAgentsWithCaseReadMayAskToo() throws Exception {
-        call("/users/names?ids=101,103", TestJwts.user(TestJwts.CARE_IN).bearer()).andExpect(status().isOk())
-                .andExpect(jsonPath("$[*].userId", contains("101", "103")));
+    @ParameterizedTest
+    @MethodSource("named")
+    void onlyStaffInTheCallersCountriesAreNamed(UUID actor, String ids, String[] expected, String firstName) throws Exception {
+        call("/users/names?ids=" + ids, TestJwts.user(actor).bearer()).andExpect(status().isOk())
+                .andExpect(jsonPath("$[*].userId", contains((Object[]) expected)))
+                .andExpect(jsonPath("$[0].displayName").value(firstName));
     }
 
     static Stream<Arguments> refusedNames() {
@@ -102,30 +102,23 @@ class StaffNamesAndContactIT {
 
     static Stream<Arguments> contacts() {
         return Stream.of(
-                argumentSet("IAM-E122 agro.in (staff)", "102", 200),
-                argumentSet("IAM-E122 retailer.in (partner)", "201", 200),
-                argumentSet("IAM-E122 a grower", "1", 404),
-                argumentSet("IAM-E122 unknown", "999999", 404),
-                argumentSet("IAM-E122 malformed", "abc", 404),
-                argumentSet("IAM-E122 staff without an email", "965", 404));
+                argumentSet("IAM-E122 agro.in (staff)", "102", 200, "agro.in@growercare.test", "Vikram Agro"),
+                argumentSet("IAM-E122 retailer.in (partner)", "201", 200, "retailer.in@growercare.test", "Suresh (Patil Agro Store)"),
+                argumentSet("IAM-E122 a grower", "1", 404, null, null),
+                argumentSet("IAM-E122 unknown", "999999", 404, null, null),
+                argumentSet("IAM-E122 malformed", "abc", 404, null, null),
+                argumentSet("IAM-E122 staff without an email", "965", 404, null, null));
     }
 
     @ParameterizedTest
     @MethodSource("contacts")
-    void notificationServiceReadsStaffAndPartnerContacts(String userId, int expected) throws Exception {
+    void notificationServiceReadsStaffAndPartnerContacts(String userId, int expected, String email, String name) throws Exception {
         var result = call("/internal/users/by-id/" + userId + "/contact", TestJwts.service("notification-service").bearer())
                 .andExpect(status().is(expected));
         if (expected == 200) {
-            result.andExpect(jsonPath("$.email").isNotEmpty()).andExpect(jsonPath("$.language").value("en"))
-                    .andExpect(jsonPath("$.phone").doesNotExist());
+            result.andExpect(jsonPath("$.email").value(email)).andExpect(jsonPath("$.displayName").value(name))
+                    .andExpect(jsonPath("$.language").value("en")).andExpect(jsonPath("$.phone").doesNotExist());
         }
-    }
-
-    @Test
-    void IAM_E122_theStaffEmail() throws Exception {
-        call("/internal/users/by-id/102/contact", TestJwts.service("notification-service").bearer())
-                .andExpect(jsonPath("$.email").value("agro.in@growercare.test"))
-                .andExpect(jsonPath("$.displayName").value("Vikram Agro"));
     }
 
     static Stream<Arguments> refusedContacts() {
@@ -138,5 +131,18 @@ class StaffNamesAndContactIT {
     @MethodSource("refusedContacts")
     void onlyContactClientsReadContacts(Supplier<String> bearer) throws Exception {
         call("/internal/users/by-id/102/contact", bearer.get()).andExpect(status().isForbidden());
+    }
+
+    static Stream<Arguments> principalRoutes() {
+        return Stream.of(
+                argumentSet("IAM-E124 by subject", "/internal/users/" + TestJwts.CARE_IN + "/principal"),
+                argumentSet("IAM-E124 by id", "/internal/users/by-id/102/principal"));
+    }
+
+    /** SPEC-IAM-05 D2a: the sender reads emails and never resolves principals with grants. */
+    @ParameterizedTest
+    @MethodSource("principalRoutes")
+    void theSenderCannotResolvePrincipals(String path) throws Exception {
+        call(path, TestJwts.service("notification-service").bearer()).andExpect(status().isForbidden());
     }
 }

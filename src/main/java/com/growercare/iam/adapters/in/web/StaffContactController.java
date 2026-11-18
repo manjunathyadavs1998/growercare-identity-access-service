@@ -1,18 +1,11 @@
 package com.growercare.iam.adapters.in.web;
 
 import com.growercare.common.error.NotFoundException;
-import com.growercare.common.error.PermissionDeniedException;
 import com.growercare.common.error.ValidationException;
 import com.growercare.iam.application.StaffContacts;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import com.growercare.security.web.ServiceAuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,11 +20,11 @@ class StaffContactController {
     record ContactView(String userId, String email, String displayName, String language) { }
 
     private final StaffContacts contacts;
-    private final Set<String> contactClients;
+    private final InternalAccess access;
 
-    StaffContactController(StaffContacts contacts, @Value("${gc.contact-clients}") String contactClients) {
+    StaffContactController(StaffContacts contacts, InternalAccess access) {
         this.contacts = contacts;
-        this.contactClients = Arrays.stream(contactClients.split(",")).map(String::strip).filter(s -> !s.isEmpty()).collect(Collectors.toSet());
+        this.access = access;
     }
 
     /** R120/R121: `ids` is a comma-separated list of user ids (≤ 100). */
@@ -62,12 +55,7 @@ class StaffContactController {
     /** R122/R123: only allow-listed contact clients (on top of the /internal/** service-token rule). */
     @GetMapping("/internal/users/by-id/{userId}/contact")
     ResponseEntity<ContactView> contact(@PathVariable String userId) {
-        var auth = SecurityContextHolder.getContext().getAuthentication();
-        // service tokens arrive as gc-security's ServiceAuthenticationToken; its principal is the client id
-        String client = auth instanceof ServiceAuthenticationToken service ? String.valueOf(service.getPrincipal()) : null;
-        if (client == null || !contactClients.contains(client)) {
-            throw new PermissionDeniedException("contact");
-        }
+        access.requireContactReader();
         if (!userId.matches(IamDtos.ID)) {
             throw new NotFoundException("User");
         }

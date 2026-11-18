@@ -37,9 +37,6 @@ public class StaffContacts {
     /** R120: for staff callers only: the STAFF among {@code ids} whose home country their case:read / dashboard:read grants cover. */
     @Transactional(readOnly = true)
     public List<StaffName> names(List<Long> ids) {
-        if (ids.isEmpty() || ids.size() > MAX_IDS) {
-            throw ValidationException.of("ids", "between 1 and " + MAX_IDS + " ids");
-        }
         var principal = CurrentPrincipal.require();
         if (principal.userType() != com.growercare.security.UserType.STAFF) {
             throw new PermissionDeniedException("case:read or dashboard:read (staff)");     // growers hold case:read too
@@ -48,6 +45,10 @@ public class StaffContacts {
         var grants = principal.grants().stream().filter(g -> g.isActiveAt(now) && READERS.stream().anyMatch(g::grants)).toList();
         if (grants.isEmpty()) {
             throw new PermissionDeniedException("case:read or dashboard:read");
+        }
+        // authorised first, then the input is checked: a non-staff caller always gets 403 (review)
+        if (ids.isEmpty() || ids.size() > MAX_IDS) {
+            throw ValidationException.of("ids", "between 1 and " + MAX_IDS + " ids");
         }
         boolean global = grants.stream().anyMatch(g -> g.scopeKind() == ScopeKind.GLOBAL);
         var countries = new HashSet<String>();
