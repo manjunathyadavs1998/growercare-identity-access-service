@@ -1,5 +1,6 @@
 package com.growercare.iam.adapters.in.web;
 
+import com.growercare.common.error.ValidationException;
 import com.growercare.iam.application.UiReferenceData;
 import jakarta.validation.constraints.Pattern;
 import java.util.List;
@@ -44,9 +45,9 @@ class ReferenceController {
                                     @RequestParam @Pattern(regexp = "^[A-Z][A-Z0-9_]{1,15}$") String buCode) {
         long id;
         try {
-            id = Long.parseLong(territoryId);
+            id = Long.parseLong(territoryId);       // IamDtos.ID admits 19 digits above Long.MAX_VALUE: 400, never 500
         } catch (NumberFormatException e) {
-            throw com.growercare.common.error.ValidationException.of("territoryId", "must be a positive 64-bit id");
+            throw ValidationException.of("territoryId", "must be a positive 64-bit id");
         }
         return reference.assignable(id, buCode).stream()
                 .map(s -> new AssignableView(Long.toString(s.userId()), s.displayName(), s.roleCodes())).toList();

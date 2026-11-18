@@ -9,7 +9,7 @@
 |---|---|---|
 | D1 | **Territories:** `GET /reference/territories?country=` returns the country's territory tree (id, parent, code, name, level). Any signed-in user, for their home country and the countries their grants cover; another country is 404 | Registration, queue filters, overview and grant forms need it; territory names are not personal data |
 | D2 | **Grantable roles:** `GET /reference/roles` lists the roles **this admin may grant**: role level not above the admin's own `grant:create` grants (SPEC-IAM-01 delegation, ACC-2), with scope kind and user type. User type and scope are still checked per grant (the form filters roles by the chosen user's type). Needs `grant:create` | The form offers only what would be accepted |
-| D3 | **Assignable staff:** `GET /users/assignable?territoryId=&buCode=` lists STAFF users whose active grants carry `case:transition` and cover that territory (itself, an ancestor, or its country) and BU. Needs `case:assign`. Returns user id, display name and role codes only. case-service still checks the assignee on `PUT /assignee` | Care can pick an agronomist without the full user directory (`user:read`), and sees only people who could take the case |
+| D3 | **Assignable staff:** `GET /users/assignable?territoryId=&buCode=` lists STAFF users whose active grants carry `case:transition` and cover that territory (itself, an ancestor, its country, its country's region, or GLOBAL) and BU (no BU scope = every BU). Needs `case:assign`. Returns user id, display name and role codes only. case-service still checks the assignee on `PUT /assignee` | Care can pick an agronomist without the full user directory (`user:read`), and sees only people who could take the case |
 
 ## 1. Behaviour (rules)
 | Rule | Given | When | Then |
@@ -18,7 +18,7 @@
 | IAM-R101 | `country` neither home nor covered by a grant · unknown | territories | 404 |
 | IAM-R102 | admin with `grant:create` | `GET /reference/roles` | 200 every role whose level ≤ the highest level among the admin's `grant:create` grants, ordered by level then code |
 | IAM-R103 | no `grant:create` | roles | 403 |
-| IAM-R104 | `case:assign` | `GET /users/assignable?territoryId=T&buCode=B` | 200 ACTIVE staff with a `case:transition` grant covering T and B, by display name |
+| IAM-R104 | `case:assign` | `GET /users/assignable?territoryId=T&buCode=B` | 200 ACTIVE staff with a `case:transition` grant covering T (T, an ancestor, its country or region, or GLOBAL) and B, by display name |
 | IAM-R105 | no `case:assign` grant of the caller covers both T (geo) and B (BU) · T unknown | assignable | 404 |
 | IAM-R106 | no `case:assign` | assignable | 403 |
 
