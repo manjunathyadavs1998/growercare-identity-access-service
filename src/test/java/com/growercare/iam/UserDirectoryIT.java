@@ -15,7 +15,7 @@ import com.growercare.testsupport.TestJwts;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -69,9 +69,11 @@ class UserDirectoryIT {
     @Autowired
     MockMvc mvc;
 
-    @BeforeAll
-    static void dpo(@Autowired MockMvc ignored) {     // runs after the context (and Flyway) started
-        var owner = JdbcClient.create(DB.ownerDataSource());
+    final JdbcClient owner = JdbcClient.create(DB.ownerDataSource());
+
+    /** Idempotent; runs once the context (and Flyway) has started. */
+    @BeforeEach
+    void dpo() {
         owner.sql("""
                 INSERT INTO iam.user_account (user_id, external_subject, user_type, home_country_code, display_name, email)
                 VALUES (961, ?, 'STAFF', 'IN', 'Dev Privacy Officer', 'dpo.test@growercare.test') ON CONFLICT DO NOTHING""")

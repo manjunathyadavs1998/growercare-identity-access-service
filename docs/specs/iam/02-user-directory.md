@@ -46,7 +46,7 @@ UserView = UserSummary + {grants: [GrantView]}   (active grants only; GET /users
 ```
 
 ## 4. Data & events
-- V10: index `user_account_name_ix (lower(display_name) text_pattern_ops)` for name prefixes; word-start matches scan the country's users (small in Phase 1).
+- V10: trigram GIN index `user_account_name_trgm_ix` on `lower(display_name)` (extension `pg_trgm`); it serves both the first-word prefix (`LIKE 'x%'`) and any later word (`LIKE '% x%'`). Two-character queries have too few trigrams and may still scan; Phase 1 user counts make that acceptable.
 - No events.
 
 ## 5. Security
