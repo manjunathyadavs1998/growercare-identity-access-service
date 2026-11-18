@@ -25,7 +25,8 @@
 | Example | Rule | Input | Expected |
 |---|---|---|---|
 | IAM-E120 | R120 | tm.in, ids 102,1,105 | only 102 (Vikram Agro): 1 is a grower, 105 is Brazilian |
-| IAM-E121 | R121 | grower.in1 · 101 ids · `ids=abc` | 403 · 400 · 400 |
+| IAM-E120b | R120 | a GLOBAL executive (dashboard:read) | 102,105 | both (GLOBAL covers every country) |
+| IAM-E121 | R121 | grower.in1 · admin.in (staff, neither permission) · 101 ids · `ids=abc` · grower.in1 with `ids=abc` | 403 · 403 · 400 · 400 · 403 (authorised first) |
 | IAM-E122 | R122 | notification-service, 102 · 1 · a staff user without email | agro.in's email · 404 · 404 |
 | IAM-E123 | R123 | care.in token · case-service token | 403 · 403 |
 | IAM-E124 | R124 | notification-service on both principal routes | 403 · 403 |

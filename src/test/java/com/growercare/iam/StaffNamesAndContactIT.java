@@ -60,12 +60,20 @@ class StaffNamesAndContactIT {
     @Autowired
     MockMvc mvc;
 
-    /** Test-only: an ACTIVE staff user without an email (IAM-E122). */
+    /** Test-only: a global executive (dashboard:read, GLOBAL scope; IAM-E120). */
+    static final UUID GLOBAL_EXEC = UUID.fromString("6f1c0a10-0966-4a00-8000-000000000966");
+
+    /** Test-only users: an ACTIVE staff user without an email (IAM-E122) and a global executive (IAM-E120). */
     @org.junit.jupiter.api.BeforeEach
-    void staffWithoutEmail() {
-        org.springframework.jdbc.core.simple.JdbcClient.create(DB.ownerDataSource()).sql("""
+    void testUsers() {
+        var owner = org.springframework.jdbc.core.simple.JdbcClient.create(DB.ownerDataSource());
+        owner.sql("""
                 INSERT INTO iam.user_account (user_id, external_subject, user_type, home_country_code, display_name)
                 VALUES (965, '6f1c0a10-0965-4a00-8000-000000000965', 'STAFF', 'IN', 'No Mail Staff') ON CONFLICT DO NOTHING""").update();
+        owner.sql("""
+                INSERT INTO iam.user_account (user_id, external_subject, user_type, home_country_code, display_name, email)
+                VALUES (966, ?, 'STAFF', 'IN', 'Global Exec', 'exec.test@growercare.test') ON CONFLICT DO NOTHING""").param(GLOBAL_EXEC).update();
+        owner.sql("INSERT INTO iam.role_grant (grant_id, user_id, role_code, grant_reason) VALUES (966, 966, 'GLOBAL_EXECUTIVE', 'test: IAM-E120') ON CONFLICT DO NOTHING").update();
     }
 
     ResultActions call(String path, String bearer) throws Exception {
@@ -75,7 +83,8 @@ class StaffNamesAndContactIT {
     static Stream<Arguments> named() {
         return Stream.of(
                 argumentSet("IAM-E120 tm.in: only Indian staff (1 is a grower, 105 is Brazilian)", TestJwts.TM_IN, "102,1,105", new String[] {"102"}, "Vikram Agro"),
-                argumentSet("IAM-E120 care.in with case:read", TestJwts.CARE_IN, "101,103", new String[] {"101", "103"}, "Anita Care"));
+                argumentSet("IAM-E120 care.in with case:read", TestJwts.CARE_IN, "101,103", new String[] {"101", "103"}, "Anita Care"),
+                argumentSet("IAM-E120 a GLOBAL dashboard reader sees staff of every country", GLOBAL_EXEC, "102,105", new String[] {"102", "105"}, "Vikram Agro"));
     }
 
     @ParameterizedTest
@@ -92,7 +101,8 @@ class StaffNamesAndContactIT {
                 argumentSet("IAM-E121 a grower (holds case:read, but is not staff)", TestJwts.GROWER_IN1, "102", 403),
                 argumentSet("IAM-E121 more than 100 ids", TestJwts.TM_IN, tooMany, 400),
                 argumentSet("IAM-E121 a malformed id", TestJwts.TM_IN, "abc", 400),
-                argumentSet("IAM-E121 a grower with a malformed id is still 403 (authorised first)", TestJwts.GROWER_IN1, "abc", 403));
+                argumentSet("IAM-E121 a grower with a malformed id is still 403 (authorised first)", TestJwts.GROWER_IN1, "abc", 403),
+                argumentSet("IAM-E121 staff with neither permission (admin.in: user:read, no case:read)", TestJwts.ADMIN_IN, "102", 403));
     }
 
     @ParameterizedTest
