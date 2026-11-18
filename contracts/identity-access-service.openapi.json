@@ -284,6 +284,78 @@
           }
         },
         "type" : "object"
+      },
+      "UserPage" : {
+        "properties" : {
+          "items" : {
+            "items" : {
+              "$ref" : "#/components/schemas/UserSummary"
+            },
+            "type" : "array"
+          },
+          "nextCursor" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "UserSummary" : {
+        "properties" : {
+          "displayName" : {
+            "type" : "string"
+          },
+          "homeCountry" : {
+            "type" : "string"
+          },
+          "partnerOrgId" : {
+            "type" : "string"
+          },
+          "phoneLast4" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "userId" : {
+            "type" : "string"
+          },
+          "userType" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "UserView" : {
+        "properties" : {
+          "displayName" : {
+            "type" : "string"
+          },
+          "grants" : {
+            "items" : {
+              "$ref" : "#/components/schemas/GrantView"
+            },
+            "type" : "array"
+          },
+          "homeCountry" : {
+            "type" : "string"
+          },
+          "partnerOrgId" : {
+            "type" : "string"
+          },
+          "phoneLast4" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "userId" : {
+            "type" : "string"
+          },
+          "userType" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
       }
     },
     "securitySchemes" : {
@@ -463,6 +535,102 @@
           }
         },
         "tags" : [ "self-registration-controller" ]
+      }
+    },
+    "/users" : {
+      "get" : {
+        "operationId" : "search",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "q",
+          "required" : false,
+          "schema" : {
+            "maxLength" : 120,
+            "minLength" : 0,
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "type",
+          "required" : false,
+          "schema" : {
+            "pattern" : "^(GROWER|PARTNER|STAFF)$",
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "country",
+          "required" : false,
+          "schema" : {
+            "pattern" : "^[A-Z]{2}$",
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "status",
+          "required" : false,
+          "schema" : {
+            "pattern" : "^(ACTIVE|SUSPENDED|DEACTIVATED)$",
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "cursor",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "limit",
+          "required" : false,
+          "schema" : {
+            "default" : 20,
+            "format" : "int32",
+            "maximum" : 100,
+            "minimum" : 1,
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserPage"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "user-directory-controller" ]
+      }
+    },
+    "/users/{userId}" : {
+      "get" : {
+        "operationId" : "user",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "userId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "user-directory-controller" ]
       }
     },
     "/users/{userId}/grants" : {
