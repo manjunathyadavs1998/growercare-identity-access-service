@@ -60,11 +60,12 @@ public class StaffContacts {
         return directory.staffNames(new HashSet<>(ids)).stream().filter(s -> global || countries.contains(s.homeCountry())).toList();
     }
 
-    /** R122: ACTIVE staff or partner users only; growers, inactive and unknown users are 404. */
+    /** R122: ACTIVE staff or partner users with an email; growers, inactive, unknown and email-less users are 404. */
     @Transactional(readOnly = true)
     public Contact contact(long userId) {
         return directory.contact(userId)
                 .filter(c -> "ACTIVE".equals(c.status()) && ("STAFF".equals(c.userType()) || "PARTNER".equals(c.userType())))
+                .filter(c -> c.email() != null && !c.email().isBlank())         // nothing to send to: same as unknown
                 .orElseThrow(() -> new NotFoundException("User"));
     }
 }

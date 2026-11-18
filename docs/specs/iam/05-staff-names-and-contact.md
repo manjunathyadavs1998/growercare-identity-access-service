@@ -16,7 +16,7 @@
 |---|---|---|---|
 | IAM-R120 | a STAFF user with `case:read` or `dashboard:read` | `GET /users/names?ids=` | 200 the STAFF among the ids whose home country is in the caller's grants (or GLOBAL) |
 | IAM-R121 | not staff, or neither permission (a grower holds `case:read` but is not staff) · > 100 ids or a malformed id | names | 403 · 400 |
-| IAM-R122 | a `GC_CONTACT_CLIENTS` service token | contact | 200 `{email, displayName, language}` for ACTIVE staff/partner; 404 for growers, inactive or unknown |
+| IAM-R122 | a `GC_CONTACT_CLIENTS` service token | contact | 200 `{email, displayName, language}` for ACTIVE staff/partner **with an email**; 404 for growers, inactive, unknown, or no email (`email` is optional in IAM) |
 | IAM-R123 | a user token · another internal service client | contact | 403 · 403 (as every /internal route answers end-user tokens, IAM-E19c) |
 
 ## 2. Examples
@@ -24,7 +24,7 @@
 |---|---|---|---|
 | IAM-E120 | R120 | tm.in, ids 102,1,105 | only 102 (Vikram Agro): 1 is a grower, 105 is Brazilian |
 | IAM-E121 | R121 | grower.in1 · 101 ids · `ids=abc` | 403 · 400 · 400 |
-| IAM-E122 | R122 | notification-service, 102 · 1 | agro.in's email · 404 |
+| IAM-E122 | R122 | notification-service, 102 · 1 · a staff user without email | agro.in's email · 404 · 404 |
 | IAM-E123 | R123 | care.in token · case-service token | 403 · 403 |
 
 ## 6. Traceability

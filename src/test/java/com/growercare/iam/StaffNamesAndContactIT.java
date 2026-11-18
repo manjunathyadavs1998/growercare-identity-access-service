@@ -61,6 +61,14 @@ class StaffNamesAndContactIT {
     @Autowired
     MockMvc mvc;
 
+    /** Test-only: an ACTIVE staff user without an email (IAM-E122). */
+    @org.junit.jupiter.api.BeforeEach
+    void staffWithoutEmail() {
+        org.springframework.jdbc.core.simple.JdbcClient.create(DB.ownerDataSource()).sql("""
+                INSERT INTO iam.user_account (user_id, external_subject, user_type, home_country_code, display_name)
+                VALUES (965, '6f1c0a10-0965-4a00-8000-000000000965', 'STAFF', 'IN', 'No Mail Staff') ON CONFLICT DO NOTHING""").update();
+    }
+
     ResultActions call(String path, String bearer) throws Exception {
         return mvc.perform(get(path).header("Authorization", bearer));
     }
@@ -98,7 +106,8 @@ class StaffNamesAndContactIT {
                 argumentSet("IAM-E122 retailer.in (partner)", "201", 200),
                 argumentSet("IAM-E122 a grower", "1", 404),
                 argumentSet("IAM-E122 unknown", "999999", 404),
-                argumentSet("IAM-E122 malformed", "abc", 404));
+                argumentSet("IAM-E122 malformed", "abc", 404),
+                argumentSet("IAM-E122 staff without an email", "965", 404));
     }
 
     @ParameterizedTest
