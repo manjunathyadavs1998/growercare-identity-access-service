@@ -53,7 +53,9 @@ class IamOpenApiContractIT {
                 argumentSet("PLAT-E20b POST /grants", "/grants", "post"),
                 argumentSet("PLAT-E20c DELETE /grants/{grantId}", "/grants/{grantId}", "delete"),
                 argumentSet("PLAT-E20d GET /users/{userId}/grants", "/users/{userId}/grants", "get"),
-                argumentSet("PLAT-E20e POST /self-registration (SPEC-IAM-03)", "/self-registration", "post"));
+                argumentSet("PLAT-E20e POST /self-registration (SPEC-IAM-03)", "/self-registration", "post"),
+                argumentSet("IAM-E80 GET /users (SPEC-IAM-02)", "/users", "get"),
+                argumentSet("IAM-E81 GET /users/{userId} (SPEC-IAM-02)", "/users/{userId}", "get"));
     }
 
     @ParameterizedTest
