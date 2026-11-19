@@ -7,4 +7,6 @@ GC_CDC_ROLE: gc_cdc
 GC_MIGRATE: "true"
 OIDC_ISSUER_URI: http://issuer.test.invalid/realms/growercare
 OIDC_JWKS_URI: http://issuer.test.invalid/realms/growercare/protocol/openid-connect/certs
-GC_INTERNAL_CLIENTS: case-service
+GC_INTERNAL_CLIENTS: case-service,notification-service
+GC_CONTACT_CLIENTS: notification-service
+GC_PRINCIPAL_CLIENTS: case-service

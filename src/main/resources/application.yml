@@ -5,7 +5,7 @@ gc.required-properties: >-
   spring.datasource.url, spring.datasource.username, spring.datasource.password,
   spring.flyway.placeholders.cdc_role,
   spring.security.oauth2.resourceserver.jwt.issuer-uri, spring.security.oauth2.resourceserver.jwt.jwk-set-uri,
-  gc.security.internal-clients
+  gc.security.internal-clients, gc.contact-clients, gc.principal-clients
 
 server:
   port: ${SERVER_PORT:8081}
@@ -70,6 +70,11 @@ spring.security.oauth2.resourceserver.jwt:
   issuer-uri: ${OIDC_ISSUER_URI}
   jwk-set-uri: ${OIDC_JWKS_URI}
   audiences: gc-api,gc-internal
+
+# SPEC-IAM-05 D2: of the internal clients, those that may read staff/partner contacts (emails)
+gc.contact-clients: ${GC_CONTACT_CLIENTS}
+# of the internal clients, those that may resolve principals with their grants (the services that authorise users)
+gc.principal-clients: ${GC_PRINCIPAL_CLIENTS}
 
 gc.security:
   internal-clients: ${GC_INTERNAL_CLIENTS}

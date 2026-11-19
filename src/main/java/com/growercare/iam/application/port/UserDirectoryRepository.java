@@ -21,4 +21,14 @@ public interface UserDirectoryRepository {
     List<DirectoryUser> search(Search search);
 
     Optional<DirectoryUser> user(long userId);
+
+    /** SPEC-IAM-05: a staff member's name and home country. */
+    record StaffName(long userId, String displayName, String homeCountry) { }
+
+    List<StaffName> staffNames(java.util.Collection<Long> ids);
+
+    /** SPEC-IAM-05: who to email (no password, no phone). */
+    record Contact(long userId, String userType, String status, String email, String displayName) { }
+
+    Optional<Contact> contact(long userId);
 }
